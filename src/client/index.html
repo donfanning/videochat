@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<video autoplay="autoplay"></video>
+<script>
+
+    var wsUri = "ws://echo.websocket.org/";
+    websocket = new WebSocket(wsUri);
+    websocket.onopen = function (evt) {
+        console.log('OPEN', evt);
+    };
+    websocket.onclose = function (evt) {
+        console.log('CLOSE', evt);
+    };
+    websocket.onmessage = function (evt) {
+        var imageData=remoteCtx.createImageData(60,40);
+        var arrayBuffer;
+        var fileReader = new FileReader();
+        fileReader.onload = function() {
+            arrayBuffer = this.result;
+            var u8=new Uint8Array(arrayBuffer);
+            for(var i=0;i<arrayBuffer.byteLength;i++){
+                imageData.data[i]=u8[i];
+            }
+            //imageData.data=new Uint8Array(arrayBuffer);
+            console.log(imageData);
+            remoteCtx.putImageData(imageData,10,10);
+        };
+        fileReader.readAsArrayBuffer(evt.data);
+
+    };
+    websocket.onerror = function (evt) {
+        onError(evt)
+    };
+
+    var video;
+    var offCanvas = document.createElement('canvas');
+    offCanvas.style.width='300px';
+    offCanvas.style.height='200px';
+    var offCtx = offCanvas.getContext('2d');
+    document.body.appendChild(offCanvas);
+    var remoteCanvas = document.createElement('canvas');
+    remoteCanvas.width=60;remoteCanvas.height=40;
+    remoteCanvas.style.width='300px';
+    remoteCanvas.style.height='200px';
+    var remoteCtx = remoteCanvas.getContext('2d');
+    document.body.appendChild(remoteCanvas);
+
+    var errorCallback = function (e) {
+        console.log('Reeeejected!', e);
+    };
+
+    // Not showing vendor prefixes.
+    navigator.webkitGetUserMedia({video: true, audio: true}, function (localMediaStream) {
+        video = document.querySelector('video');
+        video.src = URL.createObjectURL(localMediaStream);
+
+
+        // Note: onloadedmetadata doesn't fire in Chrome when using it with getUserMedia.
+        // See crbug.com/110938.
+        video.onloadedmetadata = function (e) {
+            setInterval(function () {
+                offCanvas.width = 60;//video.offsetWidth;
+                offCanvas.height = 40;//video.offsetHeight;
+                offCtx.drawImage(video, 0, 0, 60, 40);
+                var data = offCtx.getImageData(0, 0, 60,40);
+                websocket.send(data.data);
+            }, 200);
+
+            // Ready to go. Do some stuff.
+        };
+    }, errorCallback);
+</script>
+</body>
+</html>
