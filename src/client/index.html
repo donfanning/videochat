@@ -6,7 +6,10 @@
 </head>
 <body>
 <video autoplay="autoplay"></video>
+<p id="p"></p>
 <script>
+    var W = 100;
+    var H = 100;
 
     var wsUri = "ws://echo.websocket.org/";
     websocket = new WebSocket(wsUri);
@@ -17,18 +20,18 @@
         console.log('CLOSE', evt);
     };
     websocket.onmessage = function (evt) {
-        var imageData=remoteCtx.createImageData(60,40);
+        var imageData = remoteCtx.createImageData(W, H);
         var arrayBuffer;
         var fileReader = new FileReader();
-        fileReader.onload = function() {
+        fileReader.onload = function () {
             arrayBuffer = this.result;
-            var u8=new Uint8Array(arrayBuffer);
-            for(var i=0;i<arrayBuffer.byteLength;i++){
-                imageData.data[i]=u8[i];
+            var u8 = new Uint8Array(arrayBuffer);
+            for (var i = 0; i < arrayBuffer.byteLength; i++) {
+                imageData.data[i] = u8[i];
             }
             //imageData.data=new Uint8Array(arrayBuffer);
             console.log(imageData);
-            remoteCtx.putImageData(imageData,10,10);
+            remoteCtx.putImageData(imageData, 0, 0);
         };
         fileReader.readAsArrayBuffer(evt.data);
 
@@ -39,14 +42,15 @@
 
     var video;
     var offCanvas = document.createElement('canvas');
-    offCanvas.style.width='300px';
-    offCanvas.style.height='200px';
+    offCanvas.style.width = '300px';
+    offCanvas.style.height = '200px';
     var offCtx = offCanvas.getContext('2d');
     document.body.appendChild(offCanvas);
     var remoteCanvas = document.createElement('canvas');
-    remoteCanvas.width=60;remoteCanvas.height=40;
-    remoteCanvas.style.width='300px';
-    remoteCanvas.style.height='200px';
+    remoteCanvas.width = W;
+    remoteCanvas.height = H;
+    remoteCanvas.style.width = '300px';
+    remoteCanvas.style.height = '200px';
     var remoteCtx = remoteCanvas.getContext('2d');
     document.body.appendChild(remoteCanvas);
 
@@ -64,11 +68,12 @@
         // See crbug.com/110938.
         video.onloadedmetadata = function (e) {
             setInterval(function () {
-                offCanvas.width = 60;//video.offsetWidth;
-                offCanvas.height = 40;//video.offsetHeight;
-                offCtx.drawImage(video, 0, 0, 60, 40);
-                var data = offCtx.getImageData(0, 0, 60,40);
+                offCanvas.width = W;//video.offsetWidth;
+                offCanvas.height = H;//video.offsetHeight;
+                offCtx.drawImage(video, 0, 0, W, H);
+                var data = offCtx.getImageData(0, 0, W, H);
                 websocket.send(data.data);
+                document.getElementById('p').innerHTML = websocket.bufferedAmount;
             }, 200);
 
             // Ready to go. Do some stuff.
