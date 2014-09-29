@@ -1,4 +1,4 @@
-define(['display', 'network', 'processor'], function (Display, Network, Proceessor) {
+define(['receive/display', 'network', 'receive/rocessor'], function (Display, Network, Proceessor) {
     var canvas = document.createElement('canvas');
     document.body.appendChild(canvas);
     var processor = new Proceessor();

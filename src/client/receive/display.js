@@ -1,26 +1,13 @@
-define([], function () {
+define(['../runnable'], function (Runnable) {
     function Display(canvas, processor) {
+        Runnable.call(this);
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
         this.processor = processor;
         this.lastImage = null;
-        this.intervalId = null;
     }
 
-    Display.prototype.start = function () {
-        if (this.intervalId !== null) {
-            throw new Error('Már fut');
-        }
-        this.intervalId = setInterval(this.run, 16);
-    }
-
-    Display.prototype.stop = function () {
-        if (this.intervalId === null) {
-            throw new Error('Nem fut');
-        }
-        clearInterval(this.intervalId);
-        this.intervalId = null;
-    }
+    Display.prototype=new Runnable();
 
     Display.prototype.run = function () {
         var image = this.processor.getImageIfHasNew(this.lastImage);
