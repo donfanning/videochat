@@ -7,7 +7,10 @@ define([], function () {
         if (this.intervalId !== null) {
             throw new Error('Már fut');
         }
-        this.intervalId = setInterval(this.run, 16);
+        var runnable = this;
+        this.intervalId = setInterval(function () {
+            runnable.run();
+        }, 16);
     }
 
     Runnable.prototype.stop = function () {

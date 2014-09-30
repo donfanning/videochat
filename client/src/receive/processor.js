@@ -20,7 +20,7 @@ define([], function () { //TODO hálózati sebesség (ws.bufferedAmount nő?)
         return null;
     }
 
-    Processor.prototype.getRatio=function(){
+    Processor.prototype.getRatio = function () {
 
     }
 
